@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/Controller.php';
+namespace Controllers;
 
 class ApiController extends Controller
 {

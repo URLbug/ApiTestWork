@@ -1,9 +1,6 @@
 <?php
 
-// echo __DIR__ . '/../Controllers/Controller.php';
-// die();
-
-require_once __DIR__ . '/../Controllers/Controller.php';
+namespace Routers;
 
 class Router
 {
@@ -19,7 +16,7 @@ class Router
      * 
      * @param string $method
      * @param string $path
-     * @param array<Controller, string> $controller
+     * @param array $controller
      * @return void
      */
     function add(

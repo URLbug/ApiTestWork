@@ -1,11 +1,12 @@
 <?php
 
-require_once __DIR__ . '/Router.php';
-require_once __DIR__ . '/../Controllers/ApiController.php';
-
 /**
  * Если кратко то тут идет создание роутеров 
  */
+
+namespace Routers;
+
+use Controllers\ApiController;
 
 $router = new Router;
 
