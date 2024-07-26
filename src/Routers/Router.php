@@ -63,7 +63,7 @@ class Router
             
             $controller = new $class;
             
-            $controller->{ $function }();
+            echo $controller->{ $function }();
         }
     }
 

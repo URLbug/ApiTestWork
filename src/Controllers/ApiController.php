@@ -4,8 +4,8 @@ require_once __DIR__ . '/Controller.php';
 
 class ApiController extends Controller
 {
-    function home(): void
+    function home(): string
     {
-        echo $_GET['string'];
+        return $this->json(['1' => '2']);
     }
 }

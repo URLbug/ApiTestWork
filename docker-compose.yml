@@ -1,0 +1,61 @@
+version: "3.8"
+
+services:
+  mysql:
+    image: mariadb
+    ports:
+      - "3312:3306"
+    restart: unless-stopped
+    tty: true
+    environment: 
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: apisite
+    volumes:
+      - data_mysql_database:/var/lib/mysql
+    
+    networks:
+      - network_site
+
+  nginx:
+    image: nginx:stable-alpine
+    restart: always
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./src:/var/www
+    depends_on:
+      - mysql
+      - php
+    
+    networks:
+      - network_site
+  
+  php:
+    build: 
+      context: .
+      dockerfile: php.Dockerfile
+    volumes:
+      - ./src:/var/www
+    
+    networks:
+      - network_site
+  
+  composer:
+    image: composer:latest
+    volumes:
+      - ./src:/var/www
+    
+    entrypoint: ["composer", "--ignore-platform-reqs"]
+
+    networks:
+      - network_site
+
+networks:
+  network_site:
+    driver: bridge
+
+volumes:
+  data_mysql_database:
+    driver: local
