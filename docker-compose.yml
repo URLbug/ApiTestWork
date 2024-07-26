@@ -47,7 +47,7 @@ services:
     volumes:
       - ./src:/var/www
     
-    entrypoint: ["composer", "--ignore-platform-reqs"]
+    entrypoint: ["composer"]
 
     networks:
       - network_site

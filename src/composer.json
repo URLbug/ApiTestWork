@@ -1,5 +1,5 @@
 {
     "require": {
-        "cycle/orm": "^2.8"
+        "illuminate/database": "^11.18"
     }
 }
