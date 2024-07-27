@@ -10,7 +10,7 @@ services:
     environment: 
       MYSQL_ROOT_HOST: '%'
       MYSQL_ROOT_PASSWORD: password
-      MYSQL_DATABASE: apisite
+      MYSQL_DATABASE: laravel
     volumes:
       - data_mysql_database:/var/lib/mysql
     

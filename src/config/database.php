@@ -1,29 +1,25 @@
 <?php
 
-use Illuminate\Database\Capsule\Manager as Capsule;
+namespace config;
 
-$env = parse_ini_file(__DIR__ . '/../.env');
+use PDO;
 
-$capsule = new Capsule;
+class DB
+{
+    public PDO $pdo;
 
-$capsule->addConnection([
-    'driver'    => 'mysql',
-    'host'      => $env['HOST'],
-    'database'  => $env['DATABASE'],
-    'username'  => $env['USER'],
-    'password'  => $env['PASSWORD'],,
-    'charset'   => 'utf8',
-    'collation' => 'utf8_unicode_ci',
-    'prefix'    => '',
-]);
+    function __construct() 
+    {
+        $env = parse_ini_file(__DIR__ . '/../.env');
 
-// Set the event dispatcher used by Eloquent models... (optional)
-use Illuminate\Events\Dispatcher;
-use Illuminate\Container\Container;
-$capsule->setEventDispatcher(new Dispatcher(new Container));
-
-// Make this Capsule instance available globally via static methods... (optional)
-$capsule->setAsGlobal();
-
-// Setup the Eloquent ORM... (optional; unless you've used setEventDispatcher())
-$capsule->bootEloquent();
+        $dsn = 'mysql:host=' . $env['HOST'] . ';' . 'dbname=' . $env['DATABASE'] . ';charset=' . $env['CHARSET'];
+        
+        $opt = [
+            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES   => false,
+        ];
+        
+        $this->pdo = new PDO($dsn, $env['USER'], $env['PASSWORD'], $opt); 
+    }
+}
