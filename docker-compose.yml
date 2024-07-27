@@ -38,17 +38,7 @@ services:
       dockerfile: php.Dockerfile
     volumes:
       - ./src:/var/www
-    
-    networks:
-      - network_site
-  
-  composer:
-    image: composer:latest
-    volumes:
-      - ./src:/var/www
-    
-    entrypoint: ["composer"]
-
+    entrypoint: ['php']
     networks:
       - network_site
 

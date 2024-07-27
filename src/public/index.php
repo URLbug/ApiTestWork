@@ -1,7 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../config/database.php';
-require_once __DIR__ . '/../config/migration/make.php';
+require_once __DIR__ . '/../config/migration/Migration.php';
 
 require_once __DIR__ . '/../Models/Model.php';
 

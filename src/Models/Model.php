@@ -52,7 +52,28 @@ class Model
     }
 
     /**
-     * @return array<string, string>
+     * @param array<string> $columns
+     * @return array<mixed>
+     */
+    function select(array $columns): array
+    {
+        $result = [];
+
+        $query = 'SELECT ' . join(', ', $columns) . 
+        ' FROM ' . $this->table . ';';
+
+        $datas = $this->db->pdo->query($query);
+
+        while($data = $datas->fetch())
+        {
+            $result[] = $data;
+        }
+
+        return $result; 
+    }
+
+    /**
+     * @return array<string>
      */
     protected function getTable(): array
     {
@@ -72,4 +93,3 @@ class Model
         return $columns;
     }
 }
-
