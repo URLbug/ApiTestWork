@@ -1,2 +1,2 @@
 migrate:
-	sudo docker-compose run php ./config/migration/start.php
+	sudo docker-compose run php php ./config/migration/start.php

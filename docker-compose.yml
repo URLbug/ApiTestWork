@@ -38,7 +38,6 @@ services:
       dockerfile: php.Dockerfile
     volumes:
       - ./src:/var/www
-    entrypoint: ['php']
     networks:
       - network_site
 

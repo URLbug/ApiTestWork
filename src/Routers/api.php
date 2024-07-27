@@ -10,7 +10,9 @@ use Controllers\ApiController;
 
 $router = new Router;
 
-$router->add('GET', '/home', [ApiController::class, 'home']);
+$router->add('GET', '/api/v1/users', [ApiController::class, 'getUsers']);
+$router->add('POST', '/api/v1/users', [ApiController::class, 'makeUsers']);
+
  
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
