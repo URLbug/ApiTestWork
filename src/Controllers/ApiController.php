@@ -6,19 +6,75 @@ use Models\Model;
 
 class ApiController extends Controller
 {
-    function getUsers(): string
+    function getUser(): string
     {
         $model = new Model('users');
 
-        $datas = $model->select(['name', 'age',]);
+        $user = $model->where(
+            ['name', 'age'],
+            'session = ' . '"' . $_SERVER['HTTP_COOKIE'] . '"'
+        );
 
-        return $this->json($datas);
+        if($user === [])
+        {
+            http_response_code(401);
+
+            return $this->json([
+                'code' => 401,
+                'message' => 'Пользователь не авторизован!',
+            ]); 
+        }
+
+        http_response_code(200);
+
+        return $this->json($user);
     }
 
-    function makeUsers(): string
+    function authUser(): string
     {
-        $names = [];
+        if(!isset(
+            $_GET['name'], 
+            $_GET['password']
+            )
+        ) {
+            http_response_code(400);
+        
+            return $this->json([
+                'code' => 400,
+                'message' => 'Не удалось авторизироваться!',
+            ]);
+        }
 
+        $password = hash('sha256', $_GET['password']);
+
+        $model = new Model('users');
+
+        $user = $model->where(
+            ['name'],
+            'name = ' . '"' . htmlspecialchars($_GET['name']) . 
+            '" AND password = ' . '"' . htmlspecialchars($password) . '";'
+        );
+
+        if($user === [])
+        {
+            http_response_code(400);
+        
+            return $this->json([
+                'code' => 400,
+                'message' => 'Не удалось авторизироваться!',
+            ]);
+        }
+
+        http_response_code(200);
+        
+        return $this->json([
+            'code' => 200,
+            'message' => 'Удалось аворизироваться!',
+        ]);
+    }
+
+    function makeUser(): string
+    {
         if(isset(
             $_GET['name'], 
             $_GET['password'], 
@@ -26,19 +82,20 @@ class ApiController extends Controller
         ) {
             $model = new Model('users');
 
-            $users = $model->select(['name']);
+            $users = $model->where(
+                ['name'],
+                'name = ' . '"' . htmlspecialchars($_GET['name']) . '"'
+            );
 
-            foreach($users as $user)
+            if($users === [])
             {
-                $names[] = $user['name'];
-            }
+                $password = hash('sha256', $_GET['password']);
 
-            if(!in_array($_GET['name'], $names))
-            {
                 $datas = $model->insert([
                     $_GET['name'], 
-                    $_GET['password'], 
+                    $password, 
                     $_GET['age'],
+                    $_SERVER['HTTP_COOKIE']
                 ]);
 
                 if($datas)
@@ -59,5 +116,16 @@ class ApiController extends Controller
             'code' => 400,
             'message' => 'Не удалось создать пользователя!',
         ]);
+    }
+
+    function deleteUser(): string
+    {
+        return $this->json(['1' => '2']);
+    }
+
+    function updateUser(): string
+    {
+        return $this->json(['1' => '2']);
+        
     }
 }

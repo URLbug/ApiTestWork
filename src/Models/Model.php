@@ -72,6 +72,23 @@ class Model
         return $result; 
     }
 
+    function where(array $columns, string $oper): array
+    {
+        $result = [];
+
+        $query = 'SELECT ' . join(', ', $columns) . 
+        ' FROM ' . $this->table . ' WHERE ' . $oper . ' ;';
+
+        $datas = $this->db->pdo->query($query);
+
+        while($data = $datas->fetch())
+        {
+            $result[] = $data;
+        }
+
+        return $result;
+    }
+
     /**
      * @return array<string>
      */

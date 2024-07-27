@@ -18,6 +18,7 @@ class Migration
                 'name VARCHAR(30)',
                 'password VARCHAR(250)',
                 'age INT',
+                'session VARCHAR(250)',
                 'PRIMARY KEY(usersId)',
             ]);
         }
