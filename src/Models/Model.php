@@ -90,6 +90,33 @@ class Model
     }
 
     /**
+     * @param string $opt
+     * @return bool|int
+     */
+    function delete(string $opt): bool|int
+    {
+        $result = 'DELETE FROM ' . $this->table . 
+        ' WHERE' . '"' . htmlspecialchars($opt) . '";';
+        
+        return $this->db->pdo->exec($result);
+    }
+
+    function update(array $rows, array $datas, string $opt): bool|int
+    {
+        $newDatas = [];
+
+        for($i=0; $i < count($rows); $i++)
+        {
+            $newDatas[] = $rows[$i] . ' = "' . htmlspecialchars($datas[$i]) . '"';
+        }
+
+        $result = 'UPDATE ' . $this->table . 
+        ' SET ' . join(', ', $newDatas) . ' WHERE ' . $opt . ';';
+        
+        return $this->db->pdo->exec($result);
+    }
+
+    /**
      * @return array<string>
      */
     protected function getTable(): array

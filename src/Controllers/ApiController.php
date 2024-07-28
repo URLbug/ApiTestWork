@@ -8,14 +8,9 @@ class ApiController extends Controller
 {
     function getUser(): string
     {
-        $model = new Model('users');
+        $data = $this->isAuth();
 
-        $user = $model->where(
-            ['name', 'age'],
-            'session = ' . '"' . $_SERVER['HTTP_COOKIE'] . '"'
-        );
-
-        if($user === [])
+        if($data['isAuth'])
         {
             http_response_code(401);
 
@@ -27,22 +22,18 @@ class ApiController extends Controller
 
         http_response_code(200);
 
-        return $this->json($user);
+        return $this->json($data['data']);
     }
 
     function authUser(): string
     {
-        if(!isset(
-            $_GET['name'], 
-            $_GET['password']
-            )
-        ) {
-            http_response_code(400);
-        
-            return $this->json([
-                'code' => 400,
-                'message' => 'Не удалось авторизироваться!',
-            ]);
+        $data = $this->isRequests();
+
+        if(!$data['isRequests'])
+        {
+            http_response_code($data['json']['code']);
+
+            return $data['json'];
         }
 
         $password = hash('sha256', $_GET['password']);
@@ -57,20 +48,19 @@ class ApiController extends Controller
 
         if($user === [])
         {
-            http_response_code(400);
+            http_response_code(401);
         
             return $this->json([
-                'code' => 400,
+                'code' => 401,
                 'message' => 'Не удалось авторизироваться!',
             ]);
         }
 
+        $this->updateSession($_GET['name']);
+
         http_response_code(200);
         
-        return $this->json([
-            'code' => 200,
-            'message' => 'Удалось аворизироваться!',
-        ]);
+        return $data['json'];
     }
 
     function makeUser(): string
@@ -89,13 +79,15 @@ class ApiController extends Controller
 
             if($users === [])
             {
+                session_start();
+                
                 $password = hash('sha256', $_GET['password']);
 
                 $datas = $model->insert([
                     $_GET['name'], 
                     $password, 
                     $_GET['age'],
-                    $_SERVER['HTTP_COOKIE']
+                    session_id(),
                 ]);
 
                 if($datas)
@@ -120,12 +112,95 @@ class ApiController extends Controller
 
     function deleteUser(): string
     {
-        return $this->json(['1' => '2']);
+        $data = $this->isRequests();
+
+        if(!$data['isRequests'])
+        {
+            http_response_code($data['json']['code']);
+
+            return $data['json'];
+        }
+
+        $data = $this->isAuth();
+
+        if($data['isAuth'])
+        {
+            http_response_code(401);
+
+            return $this->json([
+                'code' => 401,
+                'message' => 'Пользователь не авторизован!',
+            ]); 
+        }
+
+        http_response_code(200);
+
+        $model = new Model('users');
+
+        $opt = 'name=' . $_GET['name'] . 
+        'AND password=' . $_GET['password'];
+
+        $model->delete($opt);
+
+        return $this->json([
+            'code' => 200,
+            'message' => 'Успешно удалось удалить пользователя!',
+        ]);
     }
 
     function updateUser(): string
     {
         return $this->json(['1' => '2']);
         
+    }
+
+    private function isRequests(): array
+    {
+        if(!isset($_GET['name'], $_GET['password'])) 
+        {
+            return [
+                'json' => $this->json([
+                    'code' => 400,
+                    'message' => 'Пользователь не авторизирован!',
+                ]),
+                'isRequests' => false,
+            ];
+        }
+        
+        return [
+            'json' => $this->json([
+                'code' => 200,
+                'message' => 'Удалось аворизироваться!',
+            ]),
+            'isRequests' => true,
+        ];
+    }
+
+    private function updateSession(string $name): bool|int
+    {
+        session_start();
+        
+        $id = session_id();
+
+        $model = new Model('users');
+
+        return $model->update(['session'], [$id], 'name=' . $name);
+    }
+
+    private function isAuth(): array
+    {
+        session_start();
+
+        $model = new Model('users');
+
+        $user = $model->where(
+            ['name', 'age'],
+            'session = ' . '"' . session_id() . '"'
+        );
+
+        return [
+            'isAuth' => $user === [], 
+            'data' => $user,
+        ];
     }
 }
