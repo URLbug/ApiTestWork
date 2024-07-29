@@ -42,8 +42,8 @@ class ApiController extends Controller
 
         $user = $model->where(
             ['name'],
-            'name = ' . '"' . htmlspecialchars($_GET['name']) . 
-            '" AND password = ' . '"' . htmlspecialchars($password) . '";'
+            'name = ' . '"' . htmlspecialchars($_GET['name']) . '"' . 
+            'AND password = ' . '"' . htmlspecialchars($password) . '";'
         );
 
         if($user === [])
@@ -56,7 +56,17 @@ class ApiController extends Controller
             ]);
         }
 
-        $this->updateSession($_GET['name']);
+        $isUpdate = $this->updateSession($_GET['name']);
+
+        if(!$isUpdate)
+        {
+            http_response_code(500);
+        
+            return $this->json([
+                'code' => 500,
+                'message' => 'Не удалось авторизироваться!',
+            ]);
+        }
 
         http_response_code(200);
         
@@ -137,10 +147,20 @@ class ApiController extends Controller
 
         $model = new Model('users');
 
-        $opt = 'name=' . $_GET['name'] . 
-        'AND password=' . $_GET['password'];
+        $password = hash('sha256', $_GET['password']);
 
-        $model->delete($opt);
+        $opt = 'name=' . '"' . htmlspecialchars($_GET['name']) . '"' . 
+        ' AND password=' . '"' . $password . '"';
+
+        $isDelete = $model->delete($opt);
+
+        if(!$isDelete)
+        {
+            return $this->json([
+                'code' => 500,
+                'message' => 'Не удалось удалить пользователя!',
+            ]);
+        }
 
         return $this->json([
             'code' => 200,
@@ -150,7 +170,63 @@ class ApiController extends Controller
 
     function updateUser(): string
     {
-        return $this->json(['1' => '2']);
+        $data = $this->isRequests();
+
+        if(!$data['isRequests'])
+        {
+            http_response_code($data['json']['code']);
+
+            return $data['json'];
+        }
+
+        $data = $this->isAuth();
+
+        if($data['isAuth'])
+        {
+            http_response_code(401);
+
+            return $this->json([
+                'code' => 401,
+                'message' => 'Пользователь не авторизован!',
+            ]); 
+        }
+
+        $model = new Model('users');
+
+        $password = hash('sha256', $_GET['password']);
+
+        $opt = 'session=' . '"' . htmlspecialchars(session_id()) . '"';
+
+        $isUpdate = $model->update(
+            [
+            'name', 
+            'password', 
+            'age',
+            ],
+            [
+                $_GET['name'],
+                $password,
+                $_GET['age'],
+            ],
+           $opt
+        );
+
+        if(!$isUpdate)
+        {
+            http_response_code(500);
+
+            return $this->json([
+                'code' => 500,
+                'message' => 'Не удалось обновить данные о пользователе!',
+            ]);
+        }
+
+        http_response_code(200);
+
+        return $this->json([
+            'code' => 200,
+            'message' => 'Пользователь успешно обнавлен!',
+        ]);
         
     }
 
@@ -160,7 +236,7 @@ class ApiController extends Controller
         {
             return [
                 'json' => $this->json([
-                    'code' => 400,
+                    'code' => 401,
                     'message' => 'Пользователь не авторизирован!',
                 ]),
                 'isRequests' => false,
@@ -184,7 +260,7 @@ class ApiController extends Controller
 
         $model = new Model('users');
 
-        return $model->update(['session'], [$id], 'name=' . $name);
+        return $model->update(['session'], [$id], 'name=' . '"' . $name . '"');
     }
 
     private function isAuth(): array

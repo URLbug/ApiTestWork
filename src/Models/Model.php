@@ -96,7 +96,7 @@ class Model
     function delete(string $opt): bool|int
     {
         $result = 'DELETE FROM ' . $this->table . 
-        ' WHERE' . '"' . htmlspecialchars($opt) . '";';
+        ' WHERE ' . $opt . ';';
         
         return $this->db->pdo->exec($result);
     }
